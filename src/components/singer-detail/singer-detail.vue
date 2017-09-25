@@ -31,7 +31,6 @@ export default {
     ])
   },
   created() {
-    console.log(this.singer)
     this._getDetail()
   },
   methods: {

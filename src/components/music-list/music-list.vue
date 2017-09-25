@@ -5,12 +5,21 @@
     </div>
     <h1 class="title" v-html="title"></h1>
     <div class="bg-image" :style="bgStyle" ref="bgImage">
-      <div class="filter"></div>
+      <div class="play-wrapper">
+        <div class="play" v-show="songs.length>0" ref="playBtn">
+          <i class="icon-play"></i>
+          <span class="text">随机播放全部</span>
+        </div>
+      </div>
+      <div class="filter" ref="filter"></div>
     </div>
     <div class="bg-layer" ref='layer'></div>
     <scroll @scroll="scroll" :probe-type="probeType" :listen-scroll="listenScroll" :data="songs" class="list" ref="list">
       <div class="song-list-wrapper">
         <song-list :songs="songs"></song-list>
+      </div>
+      <div class="loading-content" v-show="!songs.length">
+        <loading></loading>
       </div>
     </scroll>
   </div>
@@ -18,9 +27,13 @@
 
 <script type="text/ecmascript-6">
 import Scroll from 'base/scroll/scroll'
+import Loading from 'base/loading/loading'
 import SongList from 'base/song-list/song-list'
+import {prefixStyle} from 'common/js/dom'
 
 const RESERVED_HEIGHT = 40
+const transform = prefixStyle('transform')
+const backdrop = prefixStyle('backdrop-filter')
 
 export default {
   props: {
@@ -43,7 +56,8 @@ export default {
   },
   components: {
     SongList,
-    Scroll
+    Scroll,
+    Loading
   },
   data() {
     return {
@@ -67,23 +81,37 @@ export default {
   watch: {
     scrollY(newY) {
       let zIndex = 0
+      let scale = 1
+      let blur = 0
       let tranlateY = Math.max(this.minTranslateY, newY)
-      this.$refs.layer.style['transform'] = `translate3d(0, ${tranlateY}px, 0)`
-      this.$refs.layer.style['-webkitTransform'] = `translate3d(0, ${tranlateY}px, 0)`
+      this.$refs.layer.style[transform] = `translate3d(0, ${tranlateY}px, 0)`
+      const percent = Math.abs(newY / this.imageH)
+      if (newY > 0) {
+        scale = 1 + percent
+        zIndex = 10
+      } else {
+        blur = Math.min(20 * percent, 20)
+      }
+      this.$refs.filter.style[backdrop] = `blur(${blur}px)`
       if (newY < this.minTranslateY) {
         zIndex = 10
         this.$refs.bgImage.style.paddingTop = `${RESERVED_HEIGHT}px`
+        this.$refs.playBtn.style.display = 'none'
       } else {
         this.$refs.bgImage.style.paddingTop = '70%'
+        this.$refs.playBtn.style.display = ''
       }
       this.$refs.bgImage.style.zIndex = zIndex
+      this.$refs.bgImage.style[transform] = `scale(${scale})`
     }
   },
   methods: {
     scroll(pos) {
       this.scrollY = pos.y
     },
-    back() {}
+    back() {
+      this.$router.back()
+    }
   }
 }
 </script>
