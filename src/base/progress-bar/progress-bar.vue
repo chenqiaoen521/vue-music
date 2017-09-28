@@ -25,28 +25,44 @@
       }
     },
     created() {
-      this.touche = {}
+      this.touch = {}
     },
     methods: {
+      progressClick(e) {
+        this._offset(e.offsetX)
+        this._triggerPercent()
+      },
       progressTouchStart(e) {
         this.touch.initiated = true
         this.touch.startX = e.touches[0].pageX
         this.touch.left = this.$refs.progress.clientWidth
       },
-      progressTouchMove() {
-
+      progressTouchMove(e) {
+        if (!this.touch.initiated) return
+        const deltaX = e.touches[0].pageX - this.touch.startX
+        const offsetWidth = Math.min(this.$refs.progressBar.clientWidth - progressBtnWidth, Math.max(0, this.touch.left + deltaX))
+        this._offset(offsetWidth)
       },
       progressTouchEnd() {
-
+        this.touch.initiated = false
+        this._triggerPercent()
+      },
+      _offset(offsetWidth) {
+        this.$refs.progress.style.width = `${offsetWidth}px`
+        this.$refs.progressBtn.style[transform] = `translate3d(${offsetWidth}px,0,0)`
+      },
+      _triggerPercent() {
+        const barWidth = this.$refs.progressBar.clientWidth - progressBtnWidth
+        const percent = this.$refs.progress.clientWidth / barWidth
+        this.$emit('percentChange', percent)
       }
     },
     watch: {
       percent(newPercent) {
-        if (newPercent >= 0) {
+        if (newPercent >= 0 && !this.touch.initiated) {
           const barWidth = this.$refs.progressBar.clientWidth - progressBtnWidth
           const offsetWidth = newPercent * barWidth
-          this.$refs.progress.style.width = `${offsetWidth}px`
-          this.$refs.progressBtn.style[transform] = `translate3d(${offsetWidth}px,0,0)`
+          this._offset(offsetWidth)
         }
       }
     }
@@ -54,7 +70,6 @@
 </script>
 <style scoped lang="stylus" rel="stylesheet/stylus">
   @import "~common/stylus/variable"
-
   .progress-bar
     height: 30px
     .bar-inner
