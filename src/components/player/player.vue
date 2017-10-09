@@ -12,7 +12,11 @@
         <h1 class="title" v-html="currentSong.name"></h1>
         <h2 class="subtitle" v-html="currentSong.singer"></h2>
       </div>
-      <div class="middle">
+      <div class="middle"
+        @touchstart.prevent="middleTouchStart"
+        @touchmove.prevent="middleTouchMove"
+        @touchend="middleTouchEnd"
+      >
         <div class="middle-l">
           <div class="cd-wrapper" ref="cd-wrapper">
             <div class="cd" :class="cdCls">
@@ -20,7 +24,7 @@
             </div>
           </div>
         </div>
-        <div class="middle-r" ref="lyricList">
+        <scroll class="middle-r" ref="lyricList" :data="currentLyric && currentLyric.lines">
           <div class="lyric-wrapper">
             <div v-if="currentLyric">
               <p ref="lyricLine" 
@@ -30,9 +34,13 @@
               >{{line.txt}}</p>
             </div>
           </div>
-        </div>
+        </scroll>
       </div>
       <div class="bottom">
+        <div class="dot-wrapper">
+          <span class="dot" :class="{'active':currentShow === 'cd'}"></span>
+          <span class="dot" :class="{'active':currentShow === 'lyric'}"></span>
+        </div>
         <div class="progress-wrapper">
           <span class="time time-l">{{format(currentTime)}}</span>
           <div class="progress-bar-wrapper">
@@ -92,17 +100,22 @@
   import {playMode} from 'common/js/config'
   import {shuffle} from 'common/js/util'
   import Lyric from 'lyric-parser'
+  import Scroll from 'base/scroll/scroll'
 
   const transform = prefixStyle('transform')
 
   export default {
+    created() {
+      this.touch = {}
+    },
     data() {
       return {
         songReady: false,
         currentTime: 0,
         radius: 32,
         currentLyric: null,
-        currentLineNum: 0
+        currentLineNum: 0,
+        currentShow: 'cd'
       }
     },
     computed: {
@@ -152,6 +165,23 @@
       }
     },
     methods: {
+      middleTouchStart(e) {
+        this.touch.initiated = true
+        const touch = e.touches[0]
+        this.touch.startX = touch.pageX
+        this.touch.startY = touch.pageY
+      },
+      middleTouchMove(e) {
+        if (!this.this.touch.initiated) {
+          return
+        }
+        const touch = e.touches[0]
+        const deltaX = touch.pageX - this.touch.startX
+        const deltaY = touch.pageY - this.touch.startY
+      },
+      middleTouchEnd(e) {
+
+      },
       end() {
         if (this.mode === playMode.loop) {
           this.loop()
@@ -199,13 +229,20 @@
       getLyric() {
         this.currentSong.getLyric().then((lyric) => {
           this.currentLyric = new Lyric(lyric, this.handleLyric)
+          this.currentLyric.play()
           if (!this.playing) {
             this.currentLyric.play()
           }
         })
       },
-      handleLyric(lineNum, txt) {
+      handleLyric({lineNum, txt}) {
         this.currentLineNum = lineNum
+        if (lineNum > 5) {
+          let lineEl = this.$refs.lyricLine[lineNum - 5]
+          this.$refs.lyricList.scrollToElement(lineEl, 1000)
+        } else {
+          this.$refs.lyricList.scrollTo(0, 0, 1000)
+        }
       },
       _pad(num, n = 2) {
         let len = num.toString().length
@@ -318,7 +355,8 @@
     },
     components: {
       ProgressBar,
-      ProgressCircle
+      ProgressCircle,
+      Scroll
     }
   }
 </script>
