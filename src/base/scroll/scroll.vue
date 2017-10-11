@@ -47,10 +47,10 @@
         }
       },
       enable() {
-        this.scorll && this.scroll.enable()
+        this.scroll && this.scroll.enable()
       },
       refresh() {
-        this.scorll && this.scroll.refresh()
+        this.scroll && this.scroll.refresh()
       },
       scrollTo() {
         this.scroll && this.scroll.scrollTo.apply(this.scroll, arguments)
