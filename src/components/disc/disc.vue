@@ -3,9 +3,8 @@
     <music-list 
     :title="title"
     :bg-image="bgImage"
-    :data="songs"
+    :songs="songs"
     >
-      
     </music-list>
   </transition>
 </template>

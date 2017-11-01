@@ -62,7 +62,20 @@ apiRoutes.get('/lyric', function (req, res) {
     console.log(e)
   })
 })
-
+apiRoutes.get('/getCdInfo', function (req, res) {
+  var url = 'http://ustbhuangyi.com/music/api/getCdInfo'
+  axios.get(url, {
+    headers: {
+      referer: 'http://ustbhuangyi.com/music/',
+      host: 'ustbhuangyi.com'
+    },
+    params: req.query
+  }).then((response) => {
+    res.json(response.data)
+  }).catch((e) => {
+    console.log(e)
+  })
+})
 app.use('/api', apiRoutes)
 var compiler = webpack(webpackConfig)
 
