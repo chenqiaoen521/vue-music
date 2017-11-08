@@ -61,6 +61,9 @@ export default {
     listScroll() {
       this.$emit('listScroll')
     },
+    refresh() {
+      this.$refs.suggest.refresh()
+    },
     selectItem(item) {
       if (item.type === TYPE_SINGER) {
         const singer = new Singer({

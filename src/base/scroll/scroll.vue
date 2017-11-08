@@ -31,6 +31,10 @@
       listenScroll: {
         type: Boolean,
         default: false
+      },
+      refreshDelay: {
+        type: Number,
+        default: 20
       }
     },
     mounted() {
@@ -83,7 +87,7 @@
       data() {
         setTimeout(() => {
           this.scorll ? this.refresh() : this._initScroll()
-        }, 20)
+        }, this.refreshDelay)
       }
     }
   }
