@@ -11,7 +11,7 @@
         <search-box ref="searchBox" @query="onQueryChange" placeholder="搜索歌曲"></search-box>
       </div>
       <div class="shortcut" v-show="!query">
-        <switches :switches="switches" :currentIndex="currentIndex" @switch="switchItem"></switches>
+        <switches @switch="switchItem" :switches="switches" :currentIndex="currentIndex"></switches>
         <div class="list-wrapper">
           <scroll ref="songList" v-if="currentIndex===0" class="list-scroll" :data="playHistory">
             <div class="list-inner">
@@ -42,19 +42,43 @@
 
 <script type="text/ecmascript-6">
   import SearchBox from 'base/search-box/search-box'
+  import Scroll from 'base/scroll/scroll'
   import Suggest from 'components/suggest/suggest'
   import {searchMixin} from 'common/js/mixin'
+  import Switches from 'base/switches/switches'
+  import {mapGetters, mapActions} from 'vuex'
+  import SongList from 'base/song-list/song-list'
+  import Song from 'common/js/song'
+  import SearchList from 'base/search-list/search-list'
+  import TopTip from 'base/top-tip/top-tip'
   export default {
     mixins: [searchMixin],
     data() {
       return {
         showFlag: false,
-        showSinger: false
+        showSinger: false,
+        currentIndex: 0,
+        switches: [
+          {name: '最近播放'},
+          {name: '搜索历史'}
+        ]
       }
+    },
+    computed: {
+      ...mapGetters([
+        'playHistory'
+      ])
     },
     methods: {
       show() {
         this.showFlag = true
+        setTimeout(() => {
+          if (this.currentIndex === 0) {
+            this.$refs.songList.refresh()
+          } else {
+            this.$refs.searchList.refresh()
+          }
+        }, 20)
       },
       hide() {
         this.showFlag = false
@@ -62,13 +86,29 @@
       onQueryChange(query) {
         this.query = query
       },
+      selectSong(song, index) {
+        if (index !== 0) {
+          this.insertSong(new Song(song))
+        }
+      },
       selectSuggest() {
         this.saveSearch()
-      }
+      },
+      switchItem(index) {
+        this.currentIndex = index
+      },
+      ...mapActions([
+        'insertSong'
+      ])
     },
     components: {
       SearchBox,
-      Suggest
+      Suggest,
+      Switches,
+      SongList,
+      SearchList,
+      Scroll,
+      TopTip
     }
   }
 </script>

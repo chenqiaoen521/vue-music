@@ -9,7 +9,7 @@
             <span class="clear" @click="showConfirm"><i class="icon-clear"></i></span>
           </h1>
         </div>
-        <scroll ref="listContent" :data="sequenceList" class="list-content" :refreshDelay="refreshDelay">
+        <scroll ref="listContent" :click="click" :data="sequenceList" class="list-content" :refreshDelay="refreshDelay">
           <transition-group ref="list" name="list" tag="ul">
             <li :key="item.id" class="item" v-for="(item,index) in sequenceList" @click="selectItem(item,index)">
               <i class="current" :class="getCurrentIcon(item)"></i>
@@ -54,13 +54,15 @@
         if (!this.showFlag || newSong.id === oldSong.id) {
           return
         }
+        console.log('watch')
         this.scrollToCurrent(newSong)
       }
     },
     data() {
       return {
         showFlag: false,
-        refreshDelay: 120
+        refreshDelay: 120,
+        click: false
       }
     },
     components: {
@@ -88,9 +90,7 @@
       showConfirm() {
         this.$refs.confirm.show()
       },
-      deleteOne(item, e) {
-        if (!e._constructed) return
-        console.log('delete song')
+      deleteOne(item) {
         this.deleteSong(item)
         if (!this.playlist.length) {
           this.hide()
@@ -100,7 +100,9 @@
         const index = this.sequenceList.findIndex((song) => {
           return current.id === song.id
         })
-        this.$refs.listContent.scrollToElement(this.$refs.list.$el.children[index], 300)
+        setTimeout(() => {
+          this.$refs.listContent.scrollToElement(this.$refs.list.$el.children[index], 300)
+        }, 20)
       },
       show() {
         this.showFlag = true
