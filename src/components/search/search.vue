@@ -1,10 +1,10 @@
 <template>
   <div class="search">
     <div class="search-box-wrapper">
-      <search-box ref="searchBox" @query="onQueryChage"></search-box>
+      <search-box ref="searchBox" @query="onQueryChange"></search-box>
     </div>
     <div class="shortcut-wrapper" ref="sw" v-show="!query">
-      <Scroll ref="shortcut" class="shortcut" :data="shortcut">
+      <Scroll ref="shortcut" :refreshDelay="refreshDelay" class="shortcut" :data="shortcut">
         <div>
           <div class="hot-key">
             <h1 class="title">热门搜索</h1>

@@ -33,9 +33,10 @@ export const playerMixin = {
     },
     ...mapGetters([
       'sequenceList',
-      'currentSong',
       'playlist',
-      'mode'
+      'currentSong',
+      'mode',
+      'favoriteList'
     ])
   },
   methods: {
@@ -48,29 +49,52 @@ export const playerMixin = {
       } else {
         list = this.sequenceList
       }
-      this._resetCurrentIndex(list)
+      this.resetCurrentIndex(list)
       this.setPlaylist(list)
     },
-    _resetCurrentIndex(list) {
+    resetCurrentIndex(list) {
       let index = list.findIndex((item) => {
         return item.id === this.currentSong.id
       })
       this.setCurrentIndex(index)
     },
+    toggleFavorite(song) {
+      if (this.isFavorite(song)) {
+        this.deleteFavoriteList(song)
+      } else {
+        this.saveFavoriteList(song)
+      }
+    },
+    getFavoriteIcon(song) {
+      if (this.isFavorite(song)) {
+        return 'icon-favorite'
+      }
+      return 'icon-not-favorite'
+    },
+    isFavorite(song) {
+      const index = this.favoriteList.findIndex((item) => {
+        return item.id === song.id
+      })
+      return index > -1
+    },
     ...mapMutations({
-      setFullScreen: 'SET_FULL_SCREEN',
-      setPlayingState: 'SET_PLAYING_STATE',
-      setCurrentIndex: 'SET_CURRENT_INDEX',
       setPlayMode: 'SET_PLAY_MODE',
-      setPlaylist: 'SET_PLAYLIST'
-    })
+      setPlaylist: 'SET_PLAYLIST',
+      setCurrentIndex: 'SET_CURRENT_INDEX',
+      setPlayingState: 'SET_PLAYING_STATE'
+    }),
+    ...mapActions([
+      'saveFavoriteList',
+      'deleteFavoriteList'
+    ])
   }
 }
 
 export const searchMixin = {
   data() {
     return {
-      query: ''
+      query: '',
+      refreshDelay: 120
     }
   },
   computed: {
@@ -79,21 +103,21 @@ export const searchMixin = {
     ])
   },
   methods: {
-    ...mapActions([
-      'saveSearchHistory',
-      'deleteSearchHistory'
-    ]),
+    onQueryChange(query) {
+      this.query = query
+    },
     blurInput() {
       this.$refs.searchBox.blur()
+    },
+    addQuery(query) {
+      this.$refs.searchBox.setQuery(query)
     },
     saveSearch() {
       this.saveSearchHistory(this.query)
     },
-    onQueryChage(query) {
-      this.query = query
-    },
-    addQuery(query) {
-      this.$refs.searchBox.setQuery(query)
-    }
+    ...mapActions([
+      'saveSearchHistory',
+      'deleteSearchHistory'
+    ])
   }
 }

@@ -89,13 +89,18 @@
       selectSong(song, index) {
         if (index !== 0) {
           this.insertSong(new Song(song))
+          this.showTip()
         }
       },
       selectSuggest() {
         this.saveSearch()
+        this.showTip()
       },
       switchItem(index) {
         this.currentIndex = index
+      },
+      showTip() {
+        this.$refs.topTip.show()
       },
       ...mapActions([
         'insertSong'

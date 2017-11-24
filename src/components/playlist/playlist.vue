@@ -14,8 +14,8 @@
             <li :key="item.id" class="item" v-for="(item,index) in sequenceList" @click="selectItem(item,index)">
               <i class="current" :class="getCurrentIcon(item)"></i>
               <span class="text">{{item.name}}</span>
-              <span class="like">
-                <i></i>
+              <span @click.stop="toggleFavorite(item)" class="like">
+                <i :class="getFavoriteIcon(item)"></i>
               </span>
               <span @click.stop="deleteOne(item, $event)" class="delete">
                 <i class="icon-delete"></i>
@@ -54,14 +54,13 @@
         if (!this.showFlag || newSong.id === oldSong.id) {
           return
         }
-        console.log('watch')
         this.scrollToCurrent(newSong)
       }
     },
     data() {
       return {
         showFlag: false,
-        refreshDelay: 120,
+        refreshDelay: 100,
         click: false
       }
     },
@@ -100,9 +99,7 @@
         const index = this.sequenceList.findIndex((song) => {
           return current.id === song.id
         })
-        setTimeout(() => {
-          this.$refs.listContent.scrollToElement(this.$refs.list.$el.children[index], 300)
-        }, 20)
+        this.$refs.listContent.scrollToElement(this.$refs.list.$el.children[index], 300)
       },
       show() {
         this.showFlag = true
